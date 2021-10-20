@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -14,20 +15,25 @@ type LatLng struct {
 }
 
 func getAircrafts() {
-	req, err := http.NewRequest("GET", "https://public-api.safesky.app/v1/beacons", nil)
+	req, err := http.NewRequest(
+		"GET",
+		"https://public-api.safesky.app/v1/beacons",
+		nil,
+	)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	nw := LatLng{51.079371, 11.985945}
-	se := LatLng{47.739323, 22.585201}
+	sw := LatLng{47.739323, 11.985945}
+	ne := LatLng{51.079371, 22.585201}
+	apiKey := os.Getenv("API_KEY")
 	q := req.URL.Query()
-	q.Add("viewport", fmt.Sprintf("%f,%f,%f,%f", nw.latitude, nw.longitude, se.latitude, se.longitude))
+	q.Add("viewport", fmt.Sprintf("%f,%f,%f,%f", sw.latitude, sw.longitude, ne.latitude, ne.longitude))
 	q.Add("altitude_max", "1829")
-	q.Add("show_grounded", "true")
 	req.URL.RawQuery = q.Encode()
 	req.Header = http.Header{
-		"x-api-Key": []string{"foobarbaz"},
+		"x-api-Key": []string{apiKey},
+		"origin":    []string{"https://live.safesky.app/"},
 	}
 
 	fmt.Println(req.URL.String())
