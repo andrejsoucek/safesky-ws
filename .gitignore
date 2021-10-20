@@ -1,0 +1,11 @@
+/.vscode
+/nbproject
+/.idea
+/.project
+/vendor
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+*.orig
+*~

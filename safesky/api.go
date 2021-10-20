@@ -1,23 +1,23 @@
 package safesky
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/andrejsoucek/safesky-ws/geography"
 )
 
-func GetAircrafts() {
+func GetAircrafts(target *[][]interface{}) {
 	req, err := http.NewRequest(
 		"GET",
 		"https://public-api.safesky.app/v1/beacons",
 		nil,
 	)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	sw := geography.LatLng{Lat: 47.739323, Lon: 11.985945}
@@ -33,18 +33,21 @@ func GetAircrafts() {
 		"origin":    []string{"https://live.safesky.app/"},
 	}
 
-	fmt.Println(req.URL.String())
-
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	if resp.StatusCode == 200 {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
 
-	log.Println(string(body))
+		error := json.Unmarshal([]byte(body), target)
+		if err != nil {
+			panic(error)
+		}
+	}
 }
