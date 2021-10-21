@@ -7,17 +7,18 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/andrejsoucek/safesky-ws/aircraft"
 	"github.com/andrejsoucek/safesky-ws/geography"
 )
 
-func GetAircrafts(target *[][]interface{}) {
+func GetAircrafts() ([]aircraft.Aircraft, error) {
 	req, err := http.NewRequest(
 		"GET",
 		"https://public-api.safesky.app/v1/beacons",
 		nil,
 	)
 	if err != nil {
-		panic(err)
+		return []aircraft.Aircraft{}, err
 	}
 
 	sw := geography.LatLng{Lat: 47.739323, Lon: 11.985945}
@@ -35,19 +36,33 @@ func GetAircrafts(target *[][]interface{}) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		panic(err)
+		return []aircraft.Aircraft{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			panic(err)
+			return []aircraft.Aircraft{}, err
 		}
 
-		error := json.Unmarshal([]byte(body), target)
+		var target [][]interface{}
+		err = json.Unmarshal([]byte(body), &target)
 		if err != nil {
-			panic(error)
+			return []aircraft.Aircraft{}, err
 		}
+
+		return convertResponse(target), nil
 	}
+
+	return []aircraft.Aircraft{}, nil
+}
+
+func convertResponse(resp [][]interface{}) []aircraft.Aircraft {
+	var xs []aircraft.Aircraft
+	for _, item := range resp {
+		xs = append(xs, aircraft.CreateFromResponse(item))
+	}
+
+	return xs
 }

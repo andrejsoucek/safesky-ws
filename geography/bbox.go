@@ -16,5 +16,5 @@ func IsInBounds(bb BoundingBox, p LatLng) bool {
 		isLonInRange = p.Lon >= sw.Lon && p.Lon <= ne.Lon
 	}
 
-	return p.Lat >= sw.Lat && p.Lat <= ne.Lat && isLonInRange
+	return isLonInRange && p.Lat >= sw.Lat && p.Lat <= ne.Lat
 }
