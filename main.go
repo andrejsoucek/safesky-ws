@@ -13,6 +13,9 @@ import (
 
 func doEvery(d time.Duration, f func() ([]aircraft.Aircraft, error), aircrafts []aircraft.Aircraft, clients map[int]websocket.Client) {
 	for range time.Tick(d) {
+		if len(clients) == 0 {
+			continue
+		}
 		data, err := f()
 		if err != nil {
 			fmt.Println(err)

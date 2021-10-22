@@ -49,7 +49,6 @@ func Listen(
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		fmt.Println("closed", reason)
 		onDisconnect(s.Context().(int))
 	})
 
