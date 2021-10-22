@@ -32,6 +32,9 @@ func Listen(
 			s.Emit("error", err.Error())
 			return
 		}
+		if user.Premium != true {
+			s.Emit("error", "No premium")
+		}
 		s.SetContext(user.UserId)
 		s.Emit("success", "OK")
 	})
