@@ -1,5 +1,7 @@
 package geography
 
+import "encoding/json"
+
 type BoundingBox struct {
 	SouthWest LatLon `json:"sw"`
 	NorthEast LatLon `json:"ne"`
@@ -17,4 +19,11 @@ func IsInBounds(bb BoundingBox, p LatLon) bool {
 	}
 
 	return isLonInRange && p.Lat >= sw.Lat && p.Lat <= ne.Lat
+}
+
+func CreateBoundingBoxFromJson(data string) BoundingBox {
+	bb := BoundingBox{}
+	json.Unmarshal([]byte(data), &bb)
+
+	return bb
 }

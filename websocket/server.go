@@ -41,7 +41,7 @@ func Listen(
 			s.Emit("error", "Authenticate first.")
 			return
 		}
-		onBBUpdate(s.Context().(int), s, createBoundingBox(data))
+		onBBUpdate(s.Context().(int), s, geography.CreateBoundingBoxFromJson(data))
 	})
 
 	server.OnError("/", func(s socketio.Conn, e error) {
@@ -94,12 +94,4 @@ func createServer() *socketio.Server {
 			},
 		},
 	})
-}
-
-func createBoundingBox(data string) geography.BoundingBox {
-	// TODO move somewhere else as a factory method
-	bb := geography.BoundingBox{}
-	json.Unmarshal([]byte(data), &bb)
-
-	return bb
 }
