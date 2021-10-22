@@ -1,11 +1,11 @@
 package geography
 
 type BoundingBox struct {
-	SouthWest LatLng `json:"sw"`
-	NorthEast LatLng `json:"ne"`
+	SouthWest LatLon `json:"sw"`
+	NorthEast LatLon `json:"ne"`
 }
 
-func IsInBounds(bb BoundingBox, p LatLng) bool {
+func IsInBounds(bb BoundingBox, p LatLon) bool {
 	ne := bb.NorthEast
 	sw := bb.SouthWest
 	isLonInRange := false

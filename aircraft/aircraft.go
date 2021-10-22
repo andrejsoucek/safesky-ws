@@ -8,7 +8,7 @@ type Aircraft struct {
 	TransponderType  string           `json:"transponderType"`
 	BeaconType       string           `json:"beaconType"`
 	LastUpdate       float64          `json:"lastUpdate"`
-	LatLng           geography.LatLng `json:"latLng"`
+	LatLng           geography.LatLon `json:"latLng"`
 	Altitude         float64          `json:"altitude"`
 	VerticalRate     float64          `json:"verticalRate"`
 	Accuracy         float64          `json:"accuracy"`
@@ -27,7 +27,7 @@ func CreateFromResponse(resp []interface{}) Aircraft {
 		TransponderType:  resp[2].(string),
 		BeaconType:       resp[3].(string),
 		LastUpdate:       resp[4].(float64),
-		LatLng:           geography.LatLng{Lat: resp[5].(float64), Lon: resp[6].(float64)},
+		LatLng:           geography.LatLon{Lat: resp[5].(float64), Lon: resp[6].(float64)},
 		Altitude:         resp[7].(float64),
 		VerticalRate:     resp[8].(float64),
 		Accuracy:         resp[9].(float64),

@@ -1,6 +1,6 @@
 package geography
 
-type LatLng struct {
+type LatLon struct {
 	Lat float64 `json:"lat"`
 	Lon float64 `json:"lon"`
 }

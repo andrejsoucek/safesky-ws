@@ -51,8 +51,8 @@ func createRequest() (*http.Request, error) {
 		return &http.Request{}, err
 	}
 
-	sw := geography.LatLng{Lat: 47.739323, Lon: 11.985945}
-	ne := geography.LatLng{Lat: 51.079371, Lon: 22.585201}
+	sw := geography.LatLon{Lat: 47.739323, Lon: 11.985945}
+	ne := geography.LatLon{Lat: 51.079371, Lon: 22.585201}
 
 	apiKey := os.Getenv("API_KEY")
 	q := req.URL.Query()
