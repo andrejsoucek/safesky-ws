@@ -1,8 +1,8 @@
 package geography
 
 type BoundingBox struct {
-	SouthWest LatLng
-	NorthEast LatLng
+	SouthWest LatLng `json:"sw"`
+	NorthEast LatLng `json:"ne"`
 }
 
 func IsInBounds(bb BoundingBox, p LatLng) bool {

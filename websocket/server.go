@@ -1,10 +1,10 @@
 package websocket
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/andrejsoucek/safesky-ws/geography"
 	socketio "github.com/googollee/go-socket.io"
@@ -65,11 +65,9 @@ func createServer() *socketio.Server {
 	})
 }
 
-func createBoundingBox(bb string) geography.BoundingBox {
-	// TODO: errors and parse all 4 points
-	f, _ := strconv.ParseFloat(bb, 64)
-	return geography.BoundingBox{
-		SouthWest: geography.LatLng{Lat: f, Lon: f},
-		NorthEast: geography.LatLng{Lat: f, Lon: f},
-	}
+func createBoundingBox(data string) geography.BoundingBox {
+	bb := geography.BoundingBox{}
+	json.Unmarshal([]byte(data), &bb)
+
+	return bb
 }
