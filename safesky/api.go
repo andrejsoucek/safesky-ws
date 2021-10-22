@@ -2,6 +2,7 @@ package safesky
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -38,7 +39,7 @@ func GetAircrafts() ([]aircraft.Aircraft, error) {
 		return convertResponse(target), nil
 	}
 
-	return []aircraft.Aircraft{}, nil
+	return []aircraft.Aircraft{}, errors.New(fmt.Sprintf("Error: Status code %d", resp.StatusCode))
 }
 
 func createRequest() (*http.Request, error) {

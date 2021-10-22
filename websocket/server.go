@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/andrejsoucek/safesky-ws/aircraft"
+	"github.com/andrejsoucek/safesky-ws/authentication"
 	"github.com/andrejsoucek/safesky-ws/geography"
 	socketio "github.com/googollee/go-socket.io"
 	"github.com/googollee/go-socket.io/engineio"
@@ -15,19 +17,31 @@ import (
 )
 
 func Listen(
-	onConnect func(id string, bb geography.BoundingBox),
-	onBBUpdate func(id string, bb geography.BoundingBox),
-	onDisconnect func(id string),
+	onBBUpdate func(id int, conn socketio.Conn, bb geography.BoundingBox),
+	onDisconnect func(id int),
 ) {
 	server := createServer()
-
-	server.OnConnect("/", func(s socketio.Conn) error {
-		onConnect(s.ID(), geography.BoundingBox{})
-		return nil
+	server.OnEvent("/", "auth", func(s socketio.Conn, data string) {
+		credentials, err := authentication.CreateCredentialsFromJson(data)
+		if err != nil {
+			s.Emit("error", "Unexpected credentials.")
+			return
+		}
+		user, err := authentication.Authenticate(credentials)
+		if err != nil {
+			s.Emit("error", err.Error())
+			return
+		}
+		s.SetContext(user.UserId)
+		s.Emit("success", "OK")
 	})
 
 	server.OnEvent("/", "bb", func(s socketio.Conn, data string) {
-		onBBUpdate(s.ID(), createBoundingBox(data))
+		if s.Context() == nil {
+			s.Emit("error", "Authenticate first.")
+			return
+		}
+		onBBUpdate(s.Context().(int), s, createBoundingBox(data))
 	})
 
 	server.OnError("/", func(s socketio.Conn, e error) {
@@ -36,17 +50,34 @@ func Listen(
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
 		fmt.Println("closed", reason)
-		onDisconnect(s.ID())
+		onDisconnect(s.Context().(int))
 	})
 
 	go server.Serve()
 	defer server.Close()
 
 	http.Handle("/socket.io/", server)
-	http.Handle("/", http.FileServer(http.Dir("../asset")))
 
 	log.Println("Serving at localhost:8000...")
 	log.Fatal(http.ListenAndServe(":8000", nil))
+}
+
+func EmitAircrafts(aircrafts []aircraft.Aircraft, clients map[int]Client) {
+	for _, client := range clients {
+		var visibleAircrafts []aircraft.Aircraft
+		for _, aircraft := range aircrafts {
+			if geography.IsInBounds(client.Bb, aircraft.LatLng) {
+				visibleAircrafts = append(visibleAircrafts, aircraft)
+			}
+		}
+
+		json, err := json.Marshal(visibleAircrafts)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		client.Conn.Emit("aircrafts", string(json))
+	}
 }
 
 func createServer() *socketio.Server {
@@ -66,6 +97,7 @@ func createServer() *socketio.Server {
 }
 
 func createBoundingBox(data string) geography.BoundingBox {
+	// TODO move somewhere else as a factory method
 	bb := geography.BoundingBox{}
 	json.Unmarshal([]byte(data), &bb)
 

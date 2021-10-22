@@ -8,33 +8,34 @@ import (
 	"github.com/andrejsoucek/safesky-ws/geography"
 	"github.com/andrejsoucek/safesky-ws/safesky"
 	"github.com/andrejsoucek/safesky-ws/websocket"
+	socketio "github.com/googollee/go-socket.io"
 )
 
-func doEvery(d time.Duration, f func() ([]aircraft.Aircraft, error)) {
+func doEvery(d time.Duration, f func() ([]aircraft.Aircraft, error), aircrafts []aircraft.Aircraft, clients map[int]websocket.Client) {
 	for range time.Tick(d) {
-		aircrafts, err := f()
+		data, err := f()
 		if err != nil {
 			fmt.Println(err)
+			websocket.EmitAircrafts(aircrafts, clients)
 			continue
 		}
-		fmt.Println(aircrafts)
+		aircrafts = data
+
+		websocket.EmitAircrafts(aircrafts, clients)
 	}
 }
 
 func main() {
-	clients := map[string]geography.BoundingBox{}
-	onConnect := func(id string, bb geography.BoundingBox) {
-		clients[id] = bb
+	aircrafts := []aircraft.Aircraft{}
+	clients := map[int]websocket.Client{}
+	onBBUpdate := func(id int, conn socketio.Conn, bb geography.BoundingBox) {
+		clients[id] = websocket.Client{Conn: conn, Bb: bb}
 		fmt.Println(clients)
 	}
-	onBBUpdate := func(id string, bb geography.BoundingBox) {
-		clients[id] = bb
-		fmt.Println(clients)
-	}
-	onDisconnect := func(id string) {
+	onDisconnect := func(id int) {
 		delete(clients, id)
 		fmt.Println(clients)
 	}
-	go websocket.Listen(onConnect, onBBUpdate, onDisconnect)
-	doEvery(4000*time.Millisecond, safesky.GetAircrafts)
+	go websocket.Listen(onBBUpdate, onDisconnect)
+	doEvery(4000*time.Millisecond, safesky.GetAircrafts, aircrafts, clients)
 }
