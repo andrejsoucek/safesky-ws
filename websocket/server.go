@@ -16,10 +16,7 @@ import (
 	"github.com/googollee/go-socket.io/engineio/transport/websocket"
 )
 
-func Listen(
-	onBBUpdate func(id int, conn socketio.Conn, bb geography.BoundingBox),
-	onDisconnect func(id int),
-) {
+func Listen(clients map[socketio.Conn]geography.BoundingBox) {
 	server := createServer()
 	server.OnEvent("/", "auth", func(s socketio.Conn, data string) {
 		credentials, err := authentication.CreateCredentialsFromJson(data)
@@ -35,7 +32,7 @@ func Listen(
 		if user.Premium != true {
 			s.Emit("error", "No premium")
 		}
-		s.SetContext(user.UserId)
+		s.SetContext(user)
 		s.Emit("success", "OK")
 	})
 
@@ -44,7 +41,12 @@ func Listen(
 			s.Emit("error", "Authenticate first.")
 			return
 		}
-		onBBUpdate(s.Context().(int), s, geography.CreateBoundingBoxFromJson(data))
+		user := s.Context().(authentication.User)
+		if user.Premium != true {
+			s.Emit("error", "User is not premium.")
+			return
+		}
+		clients[s] = geography.CreateBoundingBoxFromJson(data)
 	})
 
 	server.OnError("/", func(s socketio.Conn, e error) {
@@ -52,7 +54,7 @@ func Listen(
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		onDisconnect(s.Context().(int))
+		delete(clients, s)
 	})
 
 	go server.Serve()
@@ -64,11 +66,11 @@ func Listen(
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
-func EmitAircrafts(aircrafts []aircraft.Aircraft, clients map[int]Client) {
-	for _, client := range clients {
+func EmitAircrafts(aircrafts []aircraft.Aircraft, clients map[socketio.Conn]geography.BoundingBox) {
+	for conn, bb := range clients {
 		var visibleAircrafts []aircraft.Aircraft
 		for _, aircraft := range aircrafts {
-			if geography.IsInBounds(client.Bb, aircraft.LatLng) {
+			if geography.IsInBounds(bb, aircraft.LatLng) {
 				visibleAircrafts = append(visibleAircrafts, aircraft)
 			}
 		}
@@ -78,7 +80,7 @@ func EmitAircrafts(aircrafts []aircraft.Aircraft, clients map[int]Client) {
 			fmt.Println(err)
 			continue
 		}
-		client.Conn.Emit("aircrafts", string(json))
+		conn.Emit("aircrafts", string(json))
 	}
 }
 
