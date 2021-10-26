@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/andrejsoucek/safesky-ws/aircraft"
+	"github.com/andrejsoucek/safesky-ws/config"
 	"github.com/andrejsoucek/safesky-ws/geography"
 )
 
-func GetAircrafts() ([]aircraft.Aircraft, error) {
-	req, err := createRequest()
+func GetAircrafts(cfg config.Config) ([]aircraft.Aircraft, error) {
+	req, err := createRequest(cfg)
 	if err != nil {
 		return []aircraft.Aircraft{}, err
 	}
@@ -42,10 +42,10 @@ func GetAircrafts() ([]aircraft.Aircraft, error) {
 	return []aircraft.Aircraft{}, errors.New(fmt.Sprintf("Error: Status code %d", resp.StatusCode))
 }
 
-func createRequest() (*http.Request, error) {
+func createRequest(cfg config.Config) (*http.Request, error) {
 	req, err := http.NewRequest(
 		"GET",
-		"https://public-api.safesky.app/v1/beacons",
+		cfg.SafeSkyApiUrl,
 		nil,
 	)
 	if err != nil {
@@ -55,13 +55,12 @@ func createRequest() (*http.Request, error) {
 	sw := geography.LatLon{Lat: 47.739323, Lon: 11.985945}
 	ne := geography.LatLon{Lat: 51.079371, Lon: 22.585201}
 
-	apiKey := os.Getenv("API_KEY")
 	q := req.URL.Query()
 	q.Add("viewport", fmt.Sprintf("%f,%f,%f,%f", sw.Lat, sw.Lon, ne.Lat, ne.Lon))
 	q.Add("altitude_max", "1829")
 	req.URL.RawQuery = q.Encode()
 	req.Header = http.Header{
-		"x-api-Key": []string{apiKey},
+		"x-api-Key": []string{cfg.SafeSkyApiKey},
 		"origin":    []string{"https://live.safesky.app/"},
 	}
 
@@ -69,7 +68,7 @@ func createRequest() (*http.Request, error) {
 }
 
 func convertResponse(resp [][]interface{}) []aircraft.Aircraft {
-	var xs []aircraft.Aircraft
+	xs := []aircraft.Aircraft{}
 	for _, item := range resp {
 		xs = append(xs, aircraft.CreateFromResponse(item))
 	}

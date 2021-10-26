@@ -9,3 +9,4 @@ Thumbs.db
 *.bak
 *.orig
 *~
+config.env

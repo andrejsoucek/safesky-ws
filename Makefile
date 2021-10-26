@@ -9,4 +9,11 @@ build: ## Build container
 	docker build -t safesky-ws .
 
 run: ## Run app
-	docker run -p 8000:8000 --name safesky-ws -d --restart unless-stopped safesky-ws
+	docker run \
+	--name safesky-ws \
+	--network host \
+	--restart always \
+	-v "$$(pwd)/config.env:/var/lib/safesky-ws/config/config.env" \
+	-d \
+	safesky-ws \
+	safesky-ws --env-file /var/lib/safesky-ws/config/config.env

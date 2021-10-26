@@ -1,6 +1,4 @@
-FROM golang:1.17-alpine
-
-RUN apk add --no-cache git
+FROM golang:1.17-alpine as build
 
 # Set the Current Working Directory inside the container
 WORKDIR /app/safesky-ws
@@ -21,3 +19,9 @@ EXPOSE 8000
 
 # Run the binary program produced by `go install`
 CMD ["./out/safesky-ws"]
+
+FROM alpine:3.14.2 as production
+
+WORKDIR /app/safesky-ws
+
+COPY --from=base /app/safesky-ws/out/safesky-ws /bin/safesky-ws
