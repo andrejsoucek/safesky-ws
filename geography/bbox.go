@@ -7,7 +7,7 @@ type BoundingBox struct {
 	NorthEast LatLon `json:"ne"`
 }
 
-func IsInBounds(bb BoundingBox, p LatLon) bool {
+func (bb BoundingBox) Contains(p LatLon) bool {
 	ne := bb.NorthEast
 	sw := bb.SouthWest
 	isLonInRange := false

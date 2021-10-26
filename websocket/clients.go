@@ -26,7 +26,7 @@ func (c *Clients) EmitAircrafts(aircrafts []aircraft.Aircraft) {
 	for conn, bb := range c.Connections {
 		visibleAircrafts := []aircraft.Aircraft{}
 		for _, aircraft := range aircrafts {
-			if geography.IsInBounds(bb, aircraft.LatLng) {
+			if bb.Contains(aircraft.LatLng) {
 				visibleAircrafts = append(visibleAircrafts, aircraft)
 			}
 		}
