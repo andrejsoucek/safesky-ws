@@ -9,7 +9,6 @@ import (
 
 	"github.com/andrejsoucek/safesky-ws/aircraft"
 	"github.com/andrejsoucek/safesky-ws/config"
-	"github.com/andrejsoucek/safesky-ws/geography"
 )
 
 func GetAircrafts(cfg config.Config) ([]aircraft.Aircraft, error) {
@@ -52,18 +51,20 @@ func createRequest(cfg config.Config) (*http.Request, error) {
 		return &http.Request{}, err
 	}
 
-	sw := geography.LatLon{Lat: 47.739323, Lon: 11.985945}
-	ne := geography.LatLon{Lat: 51.079371, Lon: 22.585201}
-
 	q := req.URL.Query()
-	q.Add("viewport", fmt.Sprintf("%f,%f,%f,%f", sw.Lat, sw.Lon, ne.Lat, ne.Lon))
-	q.Add("altitude_max", "1829")
+	q.Add("viewport", fmt.Sprintf(
+		"%f,%f,%f,%f",
+		cfg.SafeSkyBB.SouthWest.Lat,
+		cfg.SafeSkyBB.SouthWest.Lon,
+		cfg.SafeSkyBB.NorthEast.Lat,
+		cfg.SafeSkyBB.NorthEast.Lon,
+	))
+	q.Add("altitude_max", cfg.SafeSkyMaxAlt)
 	req.URL.RawQuery = q.Encode()
 	req.Header = http.Header{
 		"x-api-Key": []string{cfg.SafeSkyApiKey},
 		"origin":    []string{"https://live.safesky.app/"},
 	}
-
 	return req, nil
 }
 

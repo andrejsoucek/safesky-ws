@@ -39,7 +39,6 @@ func Listen(clients *Clients) {
 			conn.Emit("error", "Authenticate first.")
 			return
 		}
-		log.Info("BoundingBox Received", data)
 		clients.SetBoundingBox(conn, geography.CreateBoundingBoxFromJson(data))
 	})
 

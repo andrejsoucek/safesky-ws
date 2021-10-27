@@ -49,11 +49,11 @@ func parseArgs() Options {
 
 func main() {
 	options := parseArgs()
-	config := config.GetConfig(options.ConfigFile)
+	cfg := config.GetConfig(options.ConfigFile)
 	aircrafts := []aircraft.Aircraft{}
 	clients := &websocket.Clients{
 		Connections: map[socketio.Conn]geography.BoundingBox{},
 	}
 	go websocket.Listen(clients)
-	doEvery(4000*time.Millisecond, safesky.GetAircrafts, aircrafts, clients, config)
+	doEvery(cfg.SafeSkyUpdateInterval*time.Millisecond, safesky.GetAircrafts, aircrafts, clients, cfg)
 }
