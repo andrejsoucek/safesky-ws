@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/andrejsoucek/safesky-ws/authentication"
@@ -43,10 +42,16 @@ func Listen(clients *Clients) {
 	})
 
 	server.OnError("/", func(s socketio.Conn, e error) {
-		fmt.Println("meet error:", e)
+		log.Info("error:", e)
+	})
+
+	server.OnConnect("/", func(conn socketio.Conn) error {
+		log.Info("new client connected", clients)
+		return nil
 	})
 
 	server.OnDisconnect("/", func(conn socketio.Conn, reason string) {
+		log.Info("client disconnected", clients)
 		clients.Remove(conn)
 	})
 

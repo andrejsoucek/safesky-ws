@@ -3,19 +3,19 @@ package geography
 import "encoding/json"
 
 type BoundingBox struct {
-	SouthWest LatLon `json:"sw"`
-	NorthEast LatLon `json:"ne"`
+	SouthWest LatLng `json:"sw"`
+	NorthEast LatLng `json:"ne"`
 }
 
-func (bb BoundingBox) Contains(p LatLon) bool {
+func (bb BoundingBox) Contains(p LatLng) bool {
 	ne := bb.NorthEast
 	sw := bb.SouthWest
 	isLonInRange := false
 
-	if ne.Lon < sw.Lon {
-		isLonInRange = p.Lon >= sw.Lon || p.Lon <= ne.Lon
+	if ne.Lng < sw.Lng {
+		isLonInRange = p.Lng >= sw.Lng || p.Lng <= ne.Lng
 	} else {
-		isLonInRange = p.Lon >= sw.Lon && p.Lon <= ne.Lon
+		isLonInRange = p.Lng >= sw.Lng && p.Lng <= ne.Lng
 	}
 
 	return isLonInRange && p.Lat >= sw.Lat && p.Lat <= ne.Lat

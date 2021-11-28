@@ -52,13 +52,13 @@ func GetConfig(name string) Config {
 		SafeSkyApiKey:         os.Getenv("SAFESKY_API_KEY"),
 		SafeSkyMaxAlt:         os.Getenv("SAFESKY_MAX_ALT"),
 		SafeSkyBB: geography.BoundingBox{
-			SouthWest: geography.LatLon{
+			SouthWest: geography.LatLng{
 				Lat: swLat,
-				Lon: swLon,
+				Lng: swLon,
 			},
-			NorthEast: geography.LatLon{
+			NorthEast: geography.LatLng{
 				Lat: neLat,
-				Lon: neLon,
+				Lng: neLon,
 			},
 		},
 	}

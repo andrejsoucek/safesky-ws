@@ -55,9 +55,9 @@ func createRequest(cfg config.Config) (*http.Request, error) {
 	q.Add("viewport", fmt.Sprintf(
 		"%f,%f,%f,%f",
 		cfg.SafeSkyBB.SouthWest.Lat,
-		cfg.SafeSkyBB.SouthWest.Lon,
+		cfg.SafeSkyBB.SouthWest.Lng,
 		cfg.SafeSkyBB.NorthEast.Lat,
-		cfg.SafeSkyBB.NorthEast.Lon,
+		cfg.SafeSkyBB.NorthEast.Lng,
 	))
 	q.Add("altitude_max", cfg.SafeSkyMaxAlt)
 	req.URL.RawQuery = q.Encode()
