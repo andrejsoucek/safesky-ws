@@ -16,6 +16,8 @@ type Config struct {
 	SafeSkyApiUrl         string
 	SafeSkyMaxAlt         string
 	SafeSkyBB             geography.BoundingBox
+	SSLPathCert           string
+	SSLPathKey            string
 }
 
 func GetConfig(name string) Config {
@@ -61,5 +63,7 @@ func GetConfig(name string) Config {
 				Lng: neLon,
 			},
 		},
+		SSLPathCert: os.Getenv("WEB_SSL_PATH_CRT"),
+		SSLPathKey:  os.Getenv("WEB_SSL_PATH_KEY"),
 	}
 }

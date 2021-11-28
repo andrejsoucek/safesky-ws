@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Listen(clients *Clients) {
+func Listen(clients *Clients, certPath string, keyPath string) {
 	server := createServer()
 	server.OnEvent("/", "auth", func(conn socketio.Conn, data string) {
 		credentials, err := authentication.CreateCredentialsFromJson(data)
@@ -61,7 +61,12 @@ func Listen(clients *Clients) {
 	http.Handle("/socket.io/", server)
 
 	log.Info("Serving at localhost:8000...")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServeTLS(
+		":8000",
+		certPath,
+		keyPath,
+		nil,
+	))
 }
 
 func createServer() *socketio.Server {

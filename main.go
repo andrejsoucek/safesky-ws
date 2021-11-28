@@ -54,6 +54,6 @@ func main() {
 	clients := &websocket.Clients{
 		Connections: map[socketio.Conn]geography.BoundingBox{},
 	}
-	go websocket.Listen(clients)
+	go websocket.Listen(clients, cfg.SSLPathCert, cfg.SSLPathKey)
 	doEvery(cfg.SafeSkyUpdateInterval*time.Millisecond, safesky.GetAircrafts, aircrafts, clients, cfg)
 }
