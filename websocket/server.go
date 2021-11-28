@@ -29,6 +29,8 @@ func Listen(clients *Clients, certPath string, keyPath string) {
 		if user.Premium != true {
 			conn.Emit("error", "No premium")
 		}
+		log.Info("client successfully authenticated, ID: ", conn.ID())
+
 		conn.SetContext(user)
 		conn.Emit("success", "OK")
 	})
@@ -46,13 +48,13 @@ func Listen(clients *Clients, certPath string, keyPath string) {
 	})
 
 	server.OnConnect("/", func(conn socketio.Conn) error {
-		log.Info("new client connected", clients)
+		log.Info("new client connected, ID: ", conn.ID())
 		return nil
 	})
 
 	server.OnDisconnect("/", func(conn socketio.Conn, reason string) {
-		log.Info("client disconnected", clients)
 		clients.Remove(conn)
+		log.Info("client disconnected, ID: ", conn.ID(), ", current clients: ", clients)
 	})
 
 	go server.Serve()
@@ -60,9 +62,9 @@ func Listen(clients *Clients, certPath string, keyPath string) {
 
 	http.Handle("/socket.io/", server)
 
-	log.Info("Serving at localhost:8000...")
+	log.Info("Serving at localhost:4433...")
 	log.Fatal(http.ListenAndServeTLS(
-		":8000",
+		":4433",
 		certPath,
 		keyPath,
 		nil,
