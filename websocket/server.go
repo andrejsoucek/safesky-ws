@@ -24,10 +24,13 @@ func Listen(clients *Clients, certPath string, keyPath string) {
 		user, err := authentication.Authenticate(credentials)
 		if err != nil {
 			conn.Emit("error", err.Error())
+			conn.Close()
 			return
 		}
 		if user.Premium != true {
 			conn.Emit("error", "No premium")
+			conn.Close()
+			return
 		}
 		log.Info("client successfully authenticated, ID: ", conn.ID())
 
@@ -38,12 +41,13 @@ func Listen(clients *Clients, certPath string, keyPath string) {
 	server.OnEvent("/", "bb", func(conn socketio.Conn, data string) {
 		if conn.Context() == nil {
 			conn.Emit("error", "Authenticate first.")
+			conn.Close()
 			return
 		}
 		clients.SetBoundingBox(conn, geography.CreateBoundingBoxFromJson(data))
 	})
 
-	server.OnError("/", func(s socketio.Conn, e error) {
+	server.OnError("/", func(conn socketio.Conn, e error) {
 		log.Info("error:", e)
 	})
 
@@ -53,6 +57,7 @@ func Listen(clients *Clients, certPath string, keyPath string) {
 	})
 
 	server.OnDisconnect("/", func(conn socketio.Conn, reason string) {
+		conn.Close()
 		clients.Remove(conn)
 		log.Info("client disconnected, ID: ", conn.ID(), ", current clients: ", clients)
 	})
