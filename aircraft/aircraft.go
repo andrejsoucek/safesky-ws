@@ -22,20 +22,34 @@ type Aircraft struct {
 
 func CreateFromResponse(resp []interface{}) Aircraft {
 	return Aircraft{
-		Id:               resp[0].(string),
-		Source:           resp[1].(string),
-		TransponderType:  resp[2].(string),
-		BeaconType:       resp[3].(string),
-		LastUpdate:       resp[4].(float64),
-		LatLng:           geography.LatLng{Lat: resp[5].(float64), Lng: resp[6].(float64)},
-		Altitude:         resp[7].(float64),
-		VerticalRate:     resp[8].(float64),
-		Accuracy:         resp[9].(float64),
-		AltitudeAccuracy: resp[10].(float64),
-		Course:           resp[11].(float64),
-		GroundSpeed:      resp[12].(float64),
-		Status:           resp[13].(string),
-		TurnRate:         resp[14].(float64),
-		CallSign:         resp[15].(string),
+		Id:               toString(resp[0]),
+		Source:           toString(resp[1]),
+		TransponderType:  toString(resp[2]),
+		BeaconType:       toString(resp[3]),
+		LastUpdate:       toFloat(resp[4]),
+		LatLng:           geography.LatLng{Lat: toFloat(resp[5]), Lng: toFloat(resp[6])},
+		Altitude:         toFloat(resp[7]),
+		VerticalRate:     toFloat(resp[8]),
+		Accuracy:         toFloat(resp[9]),
+		AltitudeAccuracy: toFloat(resp[10]),
+		Course:           toFloat(resp[11]),
+		GroundSpeed:      toFloat(resp[12]),
+		Status:           toString(resp[13]),
+		TurnRate:         toFloat(resp[14]),
+		CallSign:         toString(resp[15]),
 	}
+}
+
+func toString(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	return v.(string)
+}
+
+func toFloat(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	return v.(float64)
 }
